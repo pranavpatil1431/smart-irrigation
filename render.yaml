@@ -1,21 +1,36 @@
-# Render.com Configuration for Backend
+# Render.com Blueprint Configuration
+# This file helps automate deployment on Render.com
+
 services:
+  # Backend API Service
   - type: web
     name: smart-irrigation-backend
     env: node
     region: oregon
     plan: free
-    buildCommand: cd backend && npm install
-    startCommand: cd backend && node server.js
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 5001
+        value: 10000
       - key: MONGO_URI
-        sync: false # Set this in Render dashboard
+        sync: false # Set this in Render dashboard with your MongoDB Atlas connection string
       - key: JWT_SECRET
         generateValue: true
       - key: FRONTEND_URL
-        sync: false # Set this to your frontend URL
+        sync: false # Set this to your frontend URL after frontend is deployed
     healthCheckPath: /api/health
+
+  # Frontend Static Site
+  - type: web
+    name: smart-irrigation-frontend
+    env: static
+    region: oregon
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false # Set this to your backend URL + /api (e.g., https://your-backend.onrender.com/api)
