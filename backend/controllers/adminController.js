@@ -287,16 +287,35 @@ export const approveFarmRequest = async (req, res) => {
     farm.approvedAt = new Date();
     
     // Handle location format - check for location object or individual lat/lng
-    if (location && location.coordinates) {
-      farm.location = location;
-    } else if (latitude && longitude) {
+    if (location && location.coordinates && Array.isArray(location.coordinates) && location.coordinates.length === 2) {
+      farm.location = {
+        type: 'Point',
+        coordinates: location.coordinates
+      };
+    } else if (latitude || longitude) {
       const lat = parseFloat(latitude);
       const lng = parseFloat(longitude);
       
-      if (!isNaN(lat) && !isNaN(lng) && lng >= -180 && lng <= 180 && lat >= -90 && lat <= 90) {
+      // Only update if both are provided and valid
+      if (latitude && longitude && !isNaN(lat) && !isNaN(lng) && lng >= -180 && lng <= 180 && lat >= -90 && lat <= 90) {
         farm.location = {
           type: 'Point',
           coordinates: [lng, lat]
+        };
+      }
+      // If coordinates provided but invalid, use existing farm location or default
+      else if (!farm.location || !farm.location.coordinates) {
+        farm.location = {
+          type: 'Point',
+          coordinates: [0, 0]
+        };
+      }
+    } else {
+      // No new coordinates provided - ensure location has valid coordinates
+      if (!farm.location || !farm.location.coordinates) {
+        farm.location = {
+          type: 'Point',
+          coordinates: [0, 0]
         };
       }
     }
@@ -308,6 +327,7 @@ export const approveFarmRequest = async (req, res) => {
       farm 
     });
   } catch (error) {
+    console.error('Approval error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
