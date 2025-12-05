@@ -33,6 +33,27 @@ const Login = ({ setUser }) => {
     }
   }
 
+  const quickLoginAdmin = async () => {
+    setLoading(true)
+    try {
+      const { data } = await api.post('/auth/login', {
+        email: 'admin@gmail.com',
+        password: 'admin123'
+      })
+
+      localStorage.setItem('token', data.token)
+      localStorage.setItem('user', JSON.stringify(data.user))
+      setUser(data.user)
+
+      toast.success('Admin login successful!')
+      navigate('/dashboard')
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Login failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-irrigation-50 to-green-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto">
@@ -76,6 +97,15 @@ const Login = ({ setUser }) => {
               className="w-full btn-primary text-lg h-14"
             >
               {loading ? 'Signing in...' : 'Login'}
+            </button>
+
+            <button
+              type="button"
+              onClick={quickLoginAdmin}
+              disabled={loading}
+              className="w-full mt-3 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors h-14"
+            >
+              🚀 Quick Admin Login
             </button>
           </form>
 
