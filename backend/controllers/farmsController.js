@@ -130,11 +130,12 @@ export const createFarmRequest = async (req, res) => {
       irrigationMethod,
       notes,
       latitude,
-      longitude
+      longitude,
+      area
     } = req.body;
 
-    // Get employee's assigned area
-    const employeeArea = req.user.area;
+    // Get employee's assigned area, or use provided area (for admin), or default to null
+    const farmArea = req.user.role === 'admin' ? (area || null) : req.user.area;
 
     // Validate coordinates if provided
     let coordinates = [0, 0]; // Default
@@ -157,7 +158,7 @@ export const createFarmRequest = async (req, res) => {
       villageName,
       taluka,
       district,
-      area: employeeArea,
+      area: farmArea,
       farmSize,
       soilType,
       cropType,
@@ -169,9 +170,9 @@ export const createFarmRequest = async (req, res) => {
         coordinates: coordinates
       },
       createdBy: req.user.id,
-      assignedEmployee: req.user.id,
-      approvalStatus: 'pending',
-      status: 'pending'
+      assignedEmployee: req.user.role === 'employee' ? req.user.id : null,
+      approvalStatus: req.user.role === 'admin' ? 'approved' : 'pending',
+      status: req.user.role === 'admin' ? 'active' : 'pending'
     });
 
     await farm.save();
