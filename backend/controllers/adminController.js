@@ -269,7 +269,7 @@ export const getPendingFarmRequests = async (req, res) => {
 export const approveFarmRequest = async (req, res) => {
   try {
     const { farmId } = req.params;
-    const { location } = req.body; // Admin sets exact GPS coordinates
+    const { location, latitude, longitude } = req.body; // Admin sets exact GPS coordinates
 
     const farm = await Farm.findById(farmId);
     if (!farm) {
@@ -286,8 +286,19 @@ export const approveFarmRequest = async (req, res) => {
     farm.approvedBy = req.user.id;
     farm.approvedAt = new Date();
     
+    // Handle location format - check for location object or individual lat/lng
     if (location && location.coordinates) {
       farm.location = location;
+    } else if (latitude && longitude) {
+      const lat = parseFloat(latitude);
+      const lng = parseFloat(longitude);
+      
+      if (!isNaN(lat) && !isNaN(lng) && lng >= -180 && lng <= 180 && lat >= -90 && lat <= 90) {
+        farm.location = {
+          type: 'Point',
+          coordinates: [lng, lat]
+        };
+      }
     }
 
     await farm.save();
@@ -297,7 +308,7 @@ export const approveFarmRequest = async (req, res) => {
       farm 
     });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
