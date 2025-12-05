@@ -53,7 +53,8 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-gray-50">
+      <div className="lg:ml-64 p-8">
       <div className="max-w-7xl mx-auto">
         {/* Add Farmer Button */}
         <div className="mb-6 flex justify-end">
@@ -142,6 +143,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   )

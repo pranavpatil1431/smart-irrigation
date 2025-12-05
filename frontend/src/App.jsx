@@ -7,6 +7,7 @@ import Employees from './pages/Employees'
 import AddFarmer from './pages/AddFarmer'
 import PendingFarms from './pages/PendingFarms'
 import Navbar from './components/Navbar'
+import Sidebar from './components/Sidebar'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
@@ -46,6 +47,7 @@ function App() {
   return (
     <>
       {user && <Navbar user={user} onLogout={logout} />}
+      {user && <Sidebar user={user} />}
 
       <Routes>
         <Route path="/login" element={!user ? <Login setUser={setUser} /> : <Navigate to="/dashboard" />} />

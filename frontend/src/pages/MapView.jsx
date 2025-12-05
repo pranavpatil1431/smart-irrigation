@@ -114,7 +114,7 @@ const MapView = () => {
   }
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen flex flex-col lg:ml-64">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 p-4 z-10 shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
