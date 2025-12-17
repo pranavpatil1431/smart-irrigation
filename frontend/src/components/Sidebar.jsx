@@ -23,9 +23,15 @@ const Sidebar = ({ user }) => {
       show: true
     },
     {
+      label: 'Farmers',
+      path: '/farmers',
+      icon: '📋',
+      show: user?.role === 'admin'
+    },
+    {
       label: 'Pending Approvals',
       path: '/admin/pending-farms',
-      icon: '📋',
+      icon: '✅',
       show: user?.role === 'admin'
     },
     {

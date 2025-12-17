@@ -362,3 +362,145 @@ export const rejectFarmRequest = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+// Farmer Management
+export const getAllFarmers = async (req, res) => {
+  try {
+    const { page = 1, limit = 20, search, area } = req.query;
+    
+    let query = {};
+    
+    // Search by owner name, farmer code, or survey number
+    if (search) {
+      query.$or = [
+        { ownerName: new RegExp(search, 'i') },
+        { farmerCode: new RegExp(search, 'i') },
+        { surveyNumber: new RegExp(search, 'i') }
+      ];
+    }
+    
+    // Filter by area
+    if (area) {
+      query.area = area;
+    }
+
+    const farmers = await Farm.find(query)
+      .populate('assignedEmployee', 'name email employeeId')
+      .populate('createdBy', 'name email')
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .sort({ createdAt: -1 });
+
+    const total = await Farm.countDocuments(query);
+
+    res.json({
+      farmers,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Get farmers error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const getFarmerById = async (req, res) => {
+  try {
+    const { farmerId } = req.params;
+    
+    const farmer = await Farm.findById(farmerId)
+      .populate('assignedEmployee', 'name email employeeId area')
+      .populate('createdBy', 'name email role')
+      .populate('approvedBy', 'name email');
+
+    if (!farmer) {
+      return res.status(404).json({ message: 'Farmer not found' });
+    }
+
+    res.json(farmer);
+  } catch (error) {
+    console.error('Get farmer by ID error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const updateFarmer = async (req, res) => {
+  try {
+    const { farmerId } = req.params;
+    const {
+      ownerName,
+      farmerPhone,
+      farmerCode,
+      surveyNumber,
+      subSurveyNumber,
+      villageName,
+      taluka,
+      district,
+      area,
+      farmSize,
+      soilType,
+      cropType,
+      wateringCycle,
+      irrigationMethod,
+      latitude,
+      longitude,
+      notes,
+      assignedEmployeeId
+    } = req.body;
+
+    const farmer = await Farm.findById(farmerId);
+    if (!farmer) {
+      return res.status(404).json({ message: 'Farmer not found' });
+    }
+
+    // Update fields if provided
+    if (ownerName) farmer.ownerName = ownerName;
+    if (farmerPhone) farmer.farmerPhone = farmerPhone;
+    if (farmerCode) farmer.farmerCode = farmerCode;
+    if (surveyNumber) farmer.surveyNumber = surveyNumber;
+    if (subSurveyNumber !== undefined) farmer.subSurveyNumber = subSurveyNumber;
+    if (villageName) farmer.villageName = villageName;
+    if (taluka) farmer.taluka = taluka;
+    if (district) farmer.district = district;
+    if (area !== undefined) farmer.area = area;
+    if (farmSize) farmer.farmSize = farmSize;
+    if (soilType) farmer.soilType = soilType;
+    if (cropType) farmer.cropType = cropType;
+    if (wateringCycle) farmer.wateringCycle = wateringCycle;
+    if (irrigationMethod) farmer.irrigationMethod = irrigationMethod;
+    if (notes !== undefined) farmer.notes = notes;
+    if (assignedEmployeeId !== undefined) farmer.assignedEmployee = assignedEmployeeId || null;
+
+    // Update GPS coordinates if provided
+    if (latitude && longitude) {
+      const lat = parseFloat(latitude);
+      const lng = parseFloat(longitude);
+      
+      if (!isNaN(lat) && !isNaN(lng) && lng >= -180 && lng <= 180 && lat >= -90 && lat <= 90) {
+        farmer.location = {
+          type: 'Point',
+          coordinates: [lng, lat]
+        };
+      }
+    }
+
+    await farmer.save();
+
+    res.json({
+      message: 'Farmer information updated successfully',
+      farmer
+    });
+  } catch (error) {
+    console.error('Update farmer error:', error);
+    if (error.code === 11000) {
+      return res.status(400).json({ 
+        message: 'Survey number or farmer code already exists' 
+      });
+    }
+    res.status(500).json({ message: 'Server error' });
+  }
+};

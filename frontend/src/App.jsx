@@ -6,6 +6,7 @@ import MapView from './pages/MapView'
 import Employees from './pages/Employees'
 import AddFarmer from './pages/AddFarmer'
 import PendingFarms from './pages/PendingFarms'
+import Farmers from './pages/Farmers'
 import Navbar from './components/Navbar'
 import Sidebar from './components/Sidebar'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -60,6 +61,7 @@ function App() {
           <Route path="/add-farmer" element={<AddFarmer />} />
           {user?.role === 'admin' && (
             <>
+              <Route path="/farmers" element={<Farmers />} />
               <Route path="/admin/employees" element={<Employees />} />
               <Route path="/admin/pending-farms" element={<PendingFarms />} />
             </>

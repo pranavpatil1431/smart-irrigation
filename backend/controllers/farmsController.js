@@ -190,3 +190,38 @@ export const createFarmRequest = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
+// Employee updates farm maintenance info (watering cycle, etc.)
+export const updateFarmMaintenance = async (req, res) => {
+  try {
+    const { farmId } = req.params;
+    const { wateringCycle, irrigationMethod, notes } = req.body;
+
+    const farm = await Farm.findById(farmId);
+    if (!farm) {
+      return res.status(404).json({ message: 'Farm not found' });
+    }
+
+    // Employees can only update farms in their area or assigned to them
+    if (req.user.role === 'employee') {
+      if (farm.area !== req.user.area && farm.assignedEmployee?.toString() !== req.user.id) {
+        return res.status(403).json({ message: 'Not authorized to update this farm' });
+      }
+    }
+
+    // Update fields if provided
+    if (wateringCycle) farm.wateringCycle = wateringCycle;
+    if (irrigationMethod) farm.irrigationMethod = irrigationMethod;
+    if (notes !== undefined) farm.notes = notes;
+
+    await farm.save();
+
+    res.json({
+      message: 'Farm maintenance information updated successfully',
+      farm
+    });
+  } catch (error) {
+    console.error('Update farm maintenance error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};

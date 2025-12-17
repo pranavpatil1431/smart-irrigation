@@ -11,7 +11,10 @@ import {
   assignEmployeeToFarms,
   getPendingFarmRequests,
   approveFarmRequest,
-  rejectFarmRequest
+  rejectFarmRequest,
+  getAllFarmers,
+  getFarmerById,
+  updateFarmer
 } from '../controllers/adminController.js';
 import { authMiddleware, requireAdmin } from '../middleware/auth.js';
 
@@ -38,5 +41,10 @@ router.post('/farms/assign-employee', assignEmployeeToFarms);
 router.get('/farms/pending', getPendingFarmRequests);
 router.post('/farms/:farmId/approve', approveFarmRequest);
 router.post('/farms/:farmId/reject', rejectFarmRequest);
+
+// Farmer management
+router.get('/farmers', getAllFarmers);
+router.get('/farmers/:farmerId', getFarmerById);
+router.put('/farmers/:farmerId', updateFarmer);
 
 export default router;

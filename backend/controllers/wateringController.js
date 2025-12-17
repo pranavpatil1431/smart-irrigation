@@ -78,3 +78,20 @@ export const markWatered = [
     }
   }
 ];
+
+export const getWateringLogs = async (req, res) => {
+  try {
+    const { farmId } = req.params;
+    const { limit = 10 } = req.query;
+
+    const logs = await WateringLog.find({ farm: farmId })
+      .populate('employee', 'name email employeeId')
+      .sort({ timestamp: -1 })
+      .limit(parseInt(limit));
+
+    res.json(logs);
+  } catch (error) {
+    console.error('Get watering logs error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};

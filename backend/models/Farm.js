@@ -12,7 +12,7 @@ const farmSchema = new mongoose.Schema({
   villageName: { type: String, required: true },
   taluka: { type: String, required: true },
   district: { type: String, required: true },
-  area: { type: String, required: true }, // Admin controlled area
+  area: { type: String }, // Admin controlled area (optional for admin-created farms)
   
   // Farm Details
   farmSize: { type: Number, required: true }, // in acres
