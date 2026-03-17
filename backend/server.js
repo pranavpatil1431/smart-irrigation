@@ -10,6 +10,7 @@ import farmsRoutes from './routes/farms.js';
 import wateringRoutes from './routes/watering.js';
 import supervisorRoutes from './routes/supervisor.js';
 import watermanRoutes from './routes/waterman.js';
+import User from './models/User.js';
 
 dotenv.config();
 
@@ -71,6 +72,29 @@ app.use('/api/waterman', watermanRoutes);
 // Lightweight health endpoint for quick checks
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() });
+});
+
+// Seed default admin user (development/deployment only)
+app.post('/api/seed', async (req, res) => {
+  try {
+    const adminExists = await User.findOne({ email: 'admin@gmail.com' });
+    if (adminExists) {
+      return res.json({ message: '✅ Admin already exists', email: 'admin@gmail.com' });
+    }
+
+    const admin = new User({
+      name: 'Admin User',
+      email: 'admin@gmail.com',
+      password: 'admin123',
+      role: 'admin'
+    });
+
+    await admin.save();
+    res.json({ message: '✅ Admin user created successfully', email: 'admin@gmail.com' });
+  } catch (error) {
+    console.error('Seed error:', error);
+    res.status(500).json({ message: 'Error creating admin user' });
+  }
 });
 
 // MongoDB connection
