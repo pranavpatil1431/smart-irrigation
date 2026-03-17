@@ -75,7 +75,10 @@ app.get('/api/health', (req, res) => {
 });
 
 // Seed default admin user (development/deployment only)
-app.post('/api/seed', async (req, res) => {
+app.post('/api/seed', seedAdmin);
+app.get('/api/seed', seedAdmin);
+
+async function seedAdmin(req, res) {
   try {
     const adminExists = await User.findOne({ email: 'admin@gmail.com' });
     if (adminExists) {
@@ -95,7 +98,7 @@ app.post('/api/seed', async (req, res) => {
     console.error('Seed error:', error);
     res.status(500).json({ message: 'Error creating admin user' });
   }
-});
+}
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
