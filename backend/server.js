@@ -8,6 +8,8 @@ import authRoutes from './routes/auth.js';
 import adminRoutes from './routes/admin.js';
 import farmsRoutes from './routes/farms.js';
 import wateringRoutes from './routes/watering.js';
+import supervisorRoutes from './routes/supervisor.js';
+import watermanRoutes from './routes/waterman.js';
 
 dotenv.config();
 
@@ -63,6 +65,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/farms', farmsRoutes);
 app.use('/api/watering', wateringRoutes);
+app.use('/api/supervisor', supervisorRoutes);
+app.use('/api/waterman', watermanRoutes);
 
 // Lightweight health endpoint for quick checks
 app.get('/api/health', (req, res) => {
