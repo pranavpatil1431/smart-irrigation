@@ -5,9 +5,17 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, enum: ['admin', 'employee'], default: 'employee' },
-  area: { type: String },
-  employeeId: { type: String, unique: true, sparse: true }
+  role: { type: String, enum: ['owner', 'supervisor', 'waterman', 'farmer'], default: 'farmer' },
+  area: { type: String }, // Assigned administrative area
+  employeeId: { type: String, unique: true, sparse: true }, // For waterman, supervisor
+  phone: { type: String },
+  status: { type: String, enum: ['active', 'inactive'], default: 'active' },
+  // For supervisor: array of managed watermen
+  managedWatermen: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  // For waterman: array of assigned areas
+  assignedAreas: [{ type: String }],
+  // For farmer: their farm reference
+  farm: { type: mongoose.Schema.Types.ObjectId, ref: 'Farm', sparse: true }
 }, { timestamps: true });
 
 // Hash password before saving

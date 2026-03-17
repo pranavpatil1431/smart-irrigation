@@ -29,10 +29,30 @@ const farmSchema = new mongoose.Schema({
   irrigationMethod: { type: String, enum: ['drip', 'sprinkler', 'flood', 'furrow'], default: 'drip' },
   
   // Status (Green/Yellow/Red based on days since last watered)
-  status: { 
-    type: String, 
-    enum: ['active', 'inactive', 'maintenance', 'pending'], 
-    default: 'active' 
+  status: {
+    type: String,
+    enum: ['active', 'inactive', 'maintenance', 'pending', 'survey_pending'],
+    default: 'survey_pending'
+  },
+
+  // Boundary Survey Details (recorded by waterman)
+  boundarySurvey: {
+    coordinates: {
+      type: { type: String, enum: ['Polygon'], default: 'Polygon' },
+      coordinates: [[[Number]]] // GeoJSON Polygon [[lng, lat], ...]
+    },
+    recordedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Waterman reference
+    recordedAt: { type: Date },
+    surveyPoints: [{ // Array of individual point recordings
+      latitude: Number,
+      longitude: Number,
+      timestamp: Date,
+      accuracy: Number // GPS accuracy in meters
+    }],
+    status: { type: String, enum: ['pending', 'submitted', 'approved', 'rejected'], default: 'pending' },
+    approvedAt: { type: Date },
+    approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Supervisor approval
+    rejectionReason: { type: String }
   },
   
   // Photos and Notes
@@ -57,6 +77,7 @@ const farmSchema = new mongoose.Schema({
 
 // 2dsphere index for geospatial queries
 farmSchema.index({ location: '2dsphere' });
+farmSchema.index({ 'boundarySurvey.coordinates': '2dsphere' });
 farmSchema.index({ area: 1 });
 farmSchema.index({ surveyNumber: 1 }, { unique: true });
 farmSchema.index({ farmerCode: 1 }, { unique: true });

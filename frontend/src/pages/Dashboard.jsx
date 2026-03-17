@@ -18,10 +18,14 @@ const Dashboard = () => {
 
   const fetchStats = async () => {
     try {
+      console.log('Fetching dashboard data...')
       const [{ data: farms }, { data: employees }] = await Promise.all([
         api.get('/farms'),
         api.get('/admin/employees')
       ])
+
+      console.log('Farms data:', farms)
+      console.log('Employees data:', employees)
 
       const overdue = farms.filter(f => f.status === 'overdue').length
       const dueSoon = farms.filter(f => f.status === 'soon').length
@@ -33,7 +37,12 @@ const Dashboard = () => {
         totalEmployees: employees.employees?.length || 0
       })
     } catch (error) {
-      toast.error('Failed to load dashboard data')
+      console.error('Dashboard error:', error)
+      if (error.response?.status === 401) {
+        toast.error('Please login to view dashboard data')
+      } else {
+        toast.error(`Failed to load dashboard data: ${error.response?.data?.message || error.message}`)
+      }
     } finally {
       setLoading(false)
     }

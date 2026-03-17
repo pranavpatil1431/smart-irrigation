@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 import api from '../services/api';
 
 export default function PendingFarms() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
   const [farms, setFarms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedFarm, setSelectedFarm] = useState(null);
